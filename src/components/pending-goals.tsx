@@ -1,8 +1,8 @@
-import { QueryClient, useQuery, useQueryClient } from '@tanstack/react-query'
-import { getPendingGoals } from '../http/get-pending-goals'
-import { OutlineButton } from './ui/outline-button'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Plus } from 'lucide-react'
 import { createGoalCompletion } from '../http/create-goal-completion'
+import { getPendingGoals } from '../http/get-pending-goals'
+import { OutlineButton } from './ui/outline-button'
 
 const PendingGoals = () => {
   const queryClient = useQueryClient()
@@ -20,6 +20,7 @@ const PendingGoals = () => {
     await createGoalCompletion(id)
 
     queryClient.invalidateQueries({ queryKey: ['summary'] })
+    queryClient.invalidateQueries({ queryKey: ['pendingGoals'] })
   }
 
   return (
