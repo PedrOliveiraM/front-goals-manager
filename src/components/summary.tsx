@@ -1,16 +1,16 @@
-import { CheckCircle2, Plus } from 'lucide-react'
-import { Button } from './ui/button'
-import { DialogTrigger } from './ui/dialog'
-import { InOrbitIcon } from './in-orbit-icon'
-import { Progress, ProgressIndicator } from './ui/progress-bar'
-import { Separator } from './ui/separator'
-import { OutlineButton } from './ui/outline-button'
 import { useQuery } from '@tanstack/react-query'
-import { getSummary } from '../http/get-summary'
 import dayjs from 'dayjs'
 import ptBR from 'dayjs/locale/pt-BR'
+import { Plus } from 'lucide-react'
+import { getSummary } from '../http/get-summary'
 import GoalCompletedItem from './goal-completed-item'
 import GoalEmpty from './goal-empty'
+import { InOrbitIcon } from './in-orbit-icon'
+import PendingGoals from './pending-goals'
+import { Button } from './ui/button'
+import { DialogTrigger } from './ui/dialog'
+import { Progress, ProgressIndicator } from './ui/progress-bar'
+import { Separator } from './ui/separator'
 
 dayjs.locale(ptBR)
 
@@ -64,31 +64,13 @@ export function Summary() {
       <Separator />
 
       {/** Area de adicionar meta concluida */}
-      <section className="flex gap-3 flex-wrap">
-        <OutlineButton>
-          <Plus className="text-zinc-600 size-4" />
-        </OutlineButton>
-        <OutlineButton>
-          <Plus className="text-zinc-600 size-4" />
-          Academia
-        </OutlineButton>
-        <OutlineButton>
-          <Plus className="text-zinc-600 size-4" />
-          Nadar
-        </OutlineButton>
-        <OutlineButton>
-          <Plus className="text-zinc-600 size-4" />
-          Meditar
-        </OutlineButton>
-      </section>
+      <PendingGoals />
 
-      {/** Area Sua semana */}
       <div className="flex flex-col gap-6">
         <h2 className="text-zinc-100 font-medium leading-snug tracking-tight">
           Sua semana
         </h2>
 
-        {/** Atividades do dia 1 */}
         {Object.entries(data.goalsPerDay).map(([date, goals]) => {
           const weekDay = dayjs(date).format('dddd')
           const formatedDate = dayjs(date).format('D [ de ]MMMM')
