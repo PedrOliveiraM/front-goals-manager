@@ -5,15 +5,36 @@ import { InOrbitIcon } from './in-orbit-icon'
 import { Progress, ProgressIndicator } from './ui/progress-bar'
 import { Separator } from './ui/separator'
 import { OutlineButton } from './ui/outline-button'
+import { useQuery } from '@tanstack/react-query'
+import { getSummary } from '../http/get-summary'
+import dayjs from 'dayjs'
+import ptBR from 'dayjs/locale/pt-BR'
+import GoalCompletedItem from './goal-completed-item'
+import GoalEmpty from './goal-empty'
+
+dayjs.locale(ptBR)
 
 export function Summary() {
+  const { data } = useQuery({
+    queryKey: ['summary'],
+    queryFn: getSummary,
+    staleTime: 1000 * 60, // Deixa essa req em cache de 60s
+  })
+
+  if (!data) return null
+
+  const firstDayOfWeek = dayjs().startOf('week').format('D MMM')
+  const lastDayOfWeek = dayjs().endOf('week').format('D MMMM')
+
+  const conmpletedPercent = Math.round((data.completed / data.total) * 100)
+
   return (
     <div className="max-w-[480px] px-5 py-10 mx-auto flex flex-col gap-6">
       <header className="flex justify-between items-center">
         <div className="flex gap-3 items-center">
           <InOrbitIcon />
-          <span className="font-semibold text-lg tracking-tight leading-tight">
-            05 a 12 de Agosto
+          <span className="font-semibold text-lg tracking-tight leading-tight captalize">
+            {firstDayOfWeek} - {lastDayOfWeek}
           </span>
         </div>
         <DialogTrigger asChild>
@@ -25,16 +46,18 @@ export function Summary() {
       </header>
 
       <div className="flex flex-col gap-3">
-        <Progress value={8} max={15}>
-          <ProgressIndicator style={{ width: '50%' }} />
+        <Progress value={data.completed} max={data.total}>
+          <ProgressIndicator style={{ width: `${conmpletedPercent}%` }} />
         </Progress>
 
         <div className="flex items-center justify-between text-xs text-zinc-400">
           <span className="text-zinc-400">
-            Você completou <span className="text-zinc-100">8 </span>de{' '}
-            <span className="text-zinc-100">15</span> metas nessa semana.
+            Você completou
+            <span className="text-zinc-100"> {data.completed}</span> de
+            <span className="text-zinc-100"> {data.total}</span> metas nessa
+            semana.
           </span>
-          <span className='text-zinc-400"'>58%</span>
+          <span className='text-zinc-400"'>{conmpletedPercent}%</span>
         </div>
       </div>
 
@@ -44,7 +67,6 @@ export function Summary() {
       <section className="flex gap-3 flex-wrap">
         <OutlineButton>
           <Plus className="text-zinc-600 size-4" />
-          Praticar Exercícios
         </OutlineButton>
         <OutlineButton>
           <Plus className="text-zinc-600 size-4" />
@@ -67,112 +89,32 @@ export function Summary() {
         </h2>
 
         {/** Atividades do dia 1 */}
-        <div className="flex flex-col gap-4">
-          <h3 className="text-zinc-100 text-base font-medium leading-snug">
-            Domingo{' '}
-            <span className="text-xs text-zinc-400 leading-snug">
-              (06 de Agosto)
-            </span>
-          </h3>
-          <p className="text-zinc-400 text-sm leading-relaxed">
-            Você ainda não completou nenhuma meta essa semana.
-          </p>
+        {Object.entries(data.goalsPerDay).map(([date, goals]) => {
+          const weekDay = dayjs(date).format('dddd')
+          const formatedDate = dayjs(date).format('D [ de ]MMMM')
 
-          {/**Lista de atividades */}
-          <ul className="flex flex-col gap-3">
-            <li className="flex gap-2 items-center">
-              <CheckCircle2 className="size-4 text-pink-400" />
-              <span className="text-zinc-400 text-xs">
-                Você completou “
-                <span className="text-zinc-100 font-medium">Acordar cedo</span>”
-                às
-                <span className="text-zinc-100"> 07:15h</span>
-              </span>
-            </li>
-            <li className="flex gap-2 items-center">
-              <CheckCircle2 className="size-4 text-pink-400" />
-              <span className="text-zinc-400 text-xs">
-                Você completou “
-                <span className="text-zinc-100 font-medium">Ler Livro</span>” às
-                <span className="text-zinc-100"> 08:13h</span>
-              </span>
-            </li>
-            <li className="flex gap-2 items-center">
-              <CheckCircle2 className="size-4 text-pink-400" />
-              <span className="text-zinc-400 text-xs">
-                Você completou “
-                <span className="text-zinc-100 font-medium">Estudar</span>” às
-                <span className="text-zinc-100"> 10:13h</span>
-              </span>
-            </li>
-            <li className="flex gap-2 items-center">
-              <CheckCircle2 className="size-4 text-pink-400" />
-              <span className="text-zinc-400 text-xs">
-                Você completou “
-                <span className="text-zinc-100 font-medium">Jantar Cedo</span>”
-                às
-                <span className="text-zinc-100"> 19:13h</span>
-              </span>
-            </li>
-          </ul>
-        </div>
+          return (
+            <div key={date} className="flex flex-col gap-4">
+              <h3 className="text-zinc-100 text-base font-medium leading-snug capitalize">
+                {weekDay}{' '}
+                <span className="text-xs text-zinc-400 leading-snug">
+                  ( {formatedDate} )
+                </span>
+              </h3>
 
-        {/** Atividades do dia 2 */}
-        <div className="flex flex-col gap-4">
-          <h3 className="text-zinc-100 text-base font-medium leading-snug">
-            Segunda{' '}
-            <span className="text-xs text-zinc-400 leading-snug">
-              (07 de Agosto)
-            </span>
-          </h3>
-          <p className="text-zinc-400 text-sm leading-relaxed">
-            Você ainda não completou nenhuma meta essa semana.
-          </p>
-
-          {/**Lista de atividades */}
-          <ul className="flex flex-col gap-3">
-            <li className="flex gap-2 items-center">
-              <CheckCircle2 className="size-4 text-pink-400" />
-              <span className="text-zinc-400 text-xs">
-                Você completou “
-                <span className="text-zinc-100 font-medium">Acordar cedo</span>”
-                às
-                <span className="text-zinc-100"> 07:15h</span>
-              </span>
-            </li>
-            <li className="flex gap-2 items-center">
-              <CheckCircle2 className="size-4 text-pink-400" />
-              <span className="text-zinc-400 text-xs">
-                Você completou “
-                <span className="text-zinc-100 font-medium">Ler Livro</span>” às
-                <span className="text-zinc-100"> 08:13h</span>
-              </span>
-            </li>
-            <li className="flex gap-2 items-center">
-              <CheckCircle2 className="size-4 text-pink-400" />
-              <span className="text-zinc-400 text-xs">
-                Você completou “
-                <span className="text-zinc-100 font-medium">Estudar</span>” às
-                <span className="text-zinc-100"> 10:13h</span>
-              </span>
-            </li>
-            <li className="flex gap-2 items-center">
-              <CheckCircle2 className="size-4 text-pink-400" />
-              <span className="text-zinc-400 text-xs">
-                Você completou “
-                <span className="text-zinc-100 font-medium">Jantar Cedo</span>”
-                às
-                <span className="text-zinc-100"> 19:13h</span>
-              </span>
-            </li>
-          </ul>
-        </div>
+              <ul className="flex flex-col gap-3">
+                {goals.map(goal =>
+                  goal ? (
+                    <GoalCompletedItem key={goal.id} goal={goal} />
+                  ) : (
+                    <GoalEmpty key={goal} />
+                  )
+                )}
+              </ul>
+            </div>
+          )
+        })}
       </div>
-
-      {/** Msg de nenhuma meta completada */}
-      <p className="text-zinc-400 text-sm leading-relaxed">
-        Você ainda não completou nenhuma meta essa semana.
-      </p>
     </div>
   )
 }
