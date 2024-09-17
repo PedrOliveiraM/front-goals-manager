@@ -1,10 +1,10 @@
 type CreateGoalDTO = {
-  goalId: string
+  title: string
   desiredWeeklyFrequency: number
 }
 
 export async function createGoal({
-  goalId,
+  title,
   desiredWeeklyFrequency,
 }: CreateGoalDTO) {
   await fetch('http://localhost:3333/goals', {
@@ -13,7 +13,7 @@ export async function createGoal({
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      goalId,
+      title,
       desiredWeeklyFrequency,
     }),
   })
